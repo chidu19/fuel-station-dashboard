@@ -21,11 +21,12 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SQLALCHEMY_ECHO'] = False
 
 # Database Configuration with optimization
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fuel_station.db?timeout=10'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fuel_station.db?timeout=30'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 3600,
     'pool_pre_ping': True,
+    'connect_args': {'timeout': 30}
 }
 
 db = SQLAlchemy(app)
@@ -123,7 +124,7 @@ def upload_file():
         skipped_count = 0
         errors = []
         batch = []
-        batch_size = 1000  # Insert in batches of 1000
+        batch_size = 1000000  # Large batch size for faster processing with huge datasets
         
         for idx, row in enumerate(rows):
             try:
