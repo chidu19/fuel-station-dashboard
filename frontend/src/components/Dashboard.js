@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import StatCard from './StatCard';
 import FuelDistributionChart from './FuelDistributionChart';
 import DailyTrendChart from './DailyTrendChart';
@@ -8,7 +8,7 @@ import PaymentMethodChart from './PaymentMethodChart';
 import PaymentMixChart from './PaymentMixChart';
 import './Dashboard.css';
 
-const Dashboard = ({ data, loading, onRefresh }) => {
+const Dashboard = memo(({ data, loading, onRefresh }) => {
   if (loading) {
     return (
       <div className="dashboard loading">
@@ -111,6 +111,6 @@ const Dashboard = ({ data, loading, onRefresh }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Dashboard;

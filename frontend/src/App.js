@@ -15,7 +15,22 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [filters, setFilters] = useState({});
 
+  // Client-side cache for reducing API calls
+  const cacheRef = React.useRef({});
+  const cacheTimeRef = React.useRef({});
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in ms
+
   const fetchDashboardData = async (filterParams = {}) => {
+    // Generate cache key from filter params
+    const cacheKey = JSON.stringify(filterParams);
+    const now = Date.now();
+    
+    // Return cached data if valid
+    if (cacheRef.current[cacheKey] && now - cacheTimeRef.current[cacheKey] < CACHE_DURATION) {
+      setData(cacheRef.current[cacheKey]);
+      return;
+    }
+    
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -23,6 +38,11 @@ function App() {
       if (filterParams.end_date) params.append('end_date', filterParams.end_date);
       
       const response = await axios.get(`${API_URL}/api/dashboard-stats`, { params });
+      
+      // Cache the response
+      cacheRef.current[cacheKey] = response.data;
+      cacheTimeRef.current[cacheKey] = now;
+      
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);

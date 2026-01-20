@@ -9,9 +9,11 @@ from datetime import datetime
 from dateutil import parser as date_parser
 from functools import lru_cache
 import json
+from flask_compress import Compress
 
 app = Flask(__name__)
 CORS(app)
+Compress(app)  # Enable gzip compression for all responses
 
 # Configuration for large file uploads
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
@@ -31,6 +33,7 @@ db = SQLAlchemy(app)
 # Cache for dashboard stats
 _stats_cache = {}
 _cache_timestamp = 0
+CACHE_DURATION = 10 * 60  # 10 minutes (increased from 5)
 
 # Database Model with Indexes
 class Transaction(db.Model):
@@ -193,10 +196,10 @@ def get_dashboard_stats():
         # Build cache key
         cache_key = f"{start_date}_{end_date}"
         
-        # Check cache first (5-minute cache)
+        # Check cache first (10-minute cache)
         import time
-        global _stats_cache, _cache_timestamp
-        if cache_key in _stats_cache and time.time() - _cache_timestamp < 300:
+        global _stats_cache, _cache_timestamp, CACHE_DURATION
+        if cache_key in _stats_cache and time.time() - _cache_timestamp < CACHE_DURATION:
             return _stats_cache[cache_key], 200
         
         # Build query efficiently

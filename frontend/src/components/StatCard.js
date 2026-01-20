@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import './StatCard.css';
 
-const StatCard = ({ title, value, subtitle, icon, color }) => {
+const StatCard = memo(({ title, value, subtitle, icon, color }) => {
   return (
     <div className={`stat-card stat-card-${color}`}>
       <div className="stat-icon">{icon}</div>
@@ -12,6 +12,6 @@ const StatCard = ({ title, value, subtitle, icon, color }) => {
       </div>
     </div>
   );
-};
+});
 
 export default StatCard;
