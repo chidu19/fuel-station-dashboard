@@ -3,4 +3,5 @@ Flask-CORS
 Flask-SQLAlchemy
 python-dateutil
 openpyxl
-SQLAlchemygunicorn
+SQLAlchemy
+gunicorn
