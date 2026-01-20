@@ -90,59 +90,35 @@ def upload_file():
         if not (file.filename.endswith('.csv') or file.filename.endswith('.xlsx')):
             return jsonify({'error': 'Only CSV and Excel files are supported'}), 400
         
-        # Read file
-        if file.filename.endswith('.csv'):
-            stream = io.TextIOWrapper(file.stream, encoding='utf-8')
-            reader = csv.DictReader(stream)
-            rows = list(reader)
-        else:
-            try:
-                import openpyxl
-                file.seek(0)
-                wb = openpyxl.load_workbook(file, data_only=True)
-                ws = wb.active
-                headers = [cell.value for cell in ws[1]]
-                rows = []
-                for row in ws.iter_rows(min_row=2, values_only=True):
-                    rows.append(dict(zip(headers, row)))
-            except Exception as e:
-                return jsonify({'error': f'Error reading Excel file: {str(e)}'}), 400
-        
-        # Validate required columns
-        required_columns = ['transaction_id', 'date', 'time', 'fuel', 'machine_no', 
-                          'nozzle_no', 'liters', 'unit_price', 'amount', 'payment_type']
-        
-        if not rows:
-            return jsonify({'error': 'File is empty'}), 400
-        
-        missing_columns = [col for col in required_columns if col not in rows[0]]
-        if missing_columns:
-            return jsonify({'error': f'Missing columns: {missing_columns}'}), 400
-        
-        # Process data with batch insertion for performance
+        # Read and process file in a streaming, low‑memory way
+        required_columns = ['transaction_id', 'date', 'time', 'fuel', 'machine_no',
+                            'nozzle_no', 'liters', 'unit_price', 'amount', 'payment_type']
+
         added_count = 0
         skipped_count = 0
         errors = []
         batch = []
-        batch_size = 1000000  # Large batch size for faster processing with huge datasets
-        
-        for idx, row in enumerate(rows):
+        # Smaller batch size for Render free tier to avoid time/memory spikes
+        batch_size = 2000
+
+        def process_row(row, idx):
+            nonlocal added_count, skipped_count, batch
             try:
-                # Check if transaction already exists
                 txn_id = str(row['transaction_id']).strip()
+                if not txn_id:
+                    raise ValueError('Missing transaction_id')
+
                 existing = Transaction.query.filter_by(transaction_id=txn_id).first()
                 if existing:
                     skipped_count += 1
-                    continue
-                
-                # Parse date and time
+                    return
+
                 date_str = str(row['date']).strip()
                 time_str = str(row['time']).strip()
-                
+
                 date_obj = date_parser.parse(date_str).date()
                 time_obj = date_parser.parse(time_str).time()
-                
-                # Create transaction
+
                 transaction = Transaction(
                     transaction_id=txn_id,
                     date=date_obj,
@@ -155,24 +131,62 @@ def upload_file():
                     amount=float(row['amount']),
                     payment_type=str(row['payment_type']).strip()
                 )
-                
+
                 batch.append(transaction)
                 added_count += 1
-                
-                # Insert batch when it reaches batch_size
+
                 if len(batch) >= batch_size:
-                    db.session.add_all(batch)
-                    db.session.commit()
-                    batch = []
-                
+                    try:
+                        db.session.add_all(batch)
+                        db.session.commit()
+                        batch.clear()
+                    except Exception as batch_error:
+                        db.session.rollback()
+                        errors.append(f"Batch commit error: {str(batch_error)}")
+                        batch.clear()
             except Exception as e:
                 skipped_count += 1
-                errors.append(f"Row {idx + 1}: {str(e)}")
-        
+                errors.append(f"Row {idx}: {str(e)}")
+
+        if file.filename.endswith('.csv'):
+            stream = io.TextIOWrapper(file.stream, encoding='utf-8')
+            reader = csv.DictReader(stream)
+            headers = reader.fieldnames or []
+            if not headers:
+                return jsonify({'error': 'File is empty'}), 400
+            missing_columns = [col for col in required_columns if col not in headers]
+            if missing_columns:
+                return jsonify({'error': f'Missing columns: {missing_columns}'}), 400
+
+            for idx, row in enumerate(reader, start=2):  # start=2 accounts for header line
+                process_row(row, idx)
+        else:
+            try:
+                import openpyxl
+                file.seek(0)
+                wb = openpyxl.load_workbook(file, data_only=True, read_only=True)
+                ws = wb.active
+                headers = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
+                if not any(headers):
+                    return jsonify({'error': 'File is empty'}), 400
+                missing_columns = [col for col in required_columns if col not in headers]
+                if missing_columns:
+                    return jsonify({'error': f'Missing columns: {missing_columns}'}), 400
+
+                for idx, row_vals in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                    row = dict(zip(headers, row_vals))
+                    process_row(row, idx)
+            except Exception as e:
+                return jsonify({'error': f'Error reading Excel file: {str(e)}'}), 400
+
         # Insert remaining transactions
         if batch:
-            db.session.add_all(batch)
-            db.session.commit()
+            try:
+                db.session.add_all(batch)
+                db.session.commit()
+            except Exception as final_error:
+                db.session.rollback()
+                errors.append(f"Final batch error: {str(final_error)}")
         
         return jsonify({
             'message': 'File uploaded successfully',
