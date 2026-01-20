@@ -1,12 +1,17 @@
 """
-Minimal Flask server for fuel station dashboard
-Run with: python wsgi.py
+WSGI entry point for Gunicorn
+Production: gunicorn wsgi:app
+Development: python wsgi.py
 """
 import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app import app, db
+
+# Initialize database
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     print("\n" + "="*60)
@@ -18,11 +23,6 @@ if __name__ == '__main__':
     print("="*60 + "\n")
     
     try:
-        # Create database tables if they don't exist
-        with app.app_context():
-            db.create_all()
-            print("✓ Database initialized")
-        
         app.run(
             host='127.0.0.1',
             port=5000,
