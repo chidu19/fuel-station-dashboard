@@ -9,6 +9,9 @@ import './App.css';
 // API Base URL from environment or localhost
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
+// Cache duration constant (5 minutes in ms)
+const CACHE_DURATION = 5 * 60 * 1000;
+
 function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +21,6 @@ function App() {
   // Client-side cache for reducing API calls
   const cacheRef = React.useRef({});
   const cacheTimeRef = React.useRef({});
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in ms
 
   const fetchDashboardData = useCallback(async (filterParams = {}) => {
     // Generate cache key from filter params
