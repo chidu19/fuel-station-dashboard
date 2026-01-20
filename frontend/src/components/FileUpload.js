@@ -53,21 +53,29 @@ const FileUpload = ({ onUploadSuccess }) => {
     }
   };
 
-  const handleDownloadTemplate = async () => {
+  const handleDeleteDatabase = async () => {
+    // Confirmation dialog
+    const confirmed = window.confirm(
+      '⚠️ This will permanently delete ALL data from the database!\n\nAre you sure you want to continue?'
+    );
+    
+    if (!confirmed) return;
+
+    setLoading(true);
+    setMessage('⏳ Deleting all data...');
+    setMessageType('info');
+
     try {
-      const response = await axios.get(`${API_URL}/api/download-template`, {
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'fuel_station_template.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      await axios.delete(`${API_URL}/api/clear-database`);
+      setMessageType('success');
+      setMessage('✅ Database cleared successfully! All data has been deleted.');
+      setUploadStats(null);
+      onUploadSuccess(); // Refresh dashboard
     } catch (error) {
       setMessageType('error');
-      setMessage('❌ Failed to download template');
+      setMessage(`❌ ${error.response?.data?.error || 'Failed to delete data'}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,11 +119,12 @@ const FileUpload = ({ onUploadSuccess }) => {
           </label>
 
           <button
-            onClick={handleDownloadTemplate}
-            className="template-btn"
+            onClick={handleDeleteDatabase}
+            className="delete-btn"
             disabled={loading}
+            title="Delete all data from database"
           >
-            📥 Download Template
+            🗑️ Delete All Data
           </button>
         </div>
 

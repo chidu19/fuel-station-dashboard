@@ -408,6 +408,27 @@ def get_stats_by_date():
             'daily_summary': daily_summary,
             'total_records': len(transactions)
         }), 200
+
+@app.route('/api/clear-database', methods=['DELETE'])
+def clear_database():
+    """Delete all data from the database"""
+    try:
+        # Delete all transactions
+        Transaction.query.delete()
+        db.session.commit()
+        
+        # Clear cache
+        global _stats_cache, _cache_timestamp
+        _stats_cache = {}
+        _cache_timestamp = 0
+        
+        return jsonify({
+            'message': 'All data deleted successfully',
+            'status': 'success'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete data: {str(e)}'}), 500
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
