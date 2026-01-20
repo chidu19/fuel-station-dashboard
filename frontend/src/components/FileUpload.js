@@ -55,7 +55,7 @@ const FileUpload = ({ onUploadSuccess }) => {
 
   const handleDownloadTemplate = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/download-template', {
+      const response = await axios.get(`${API_URL}/api/download-template`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
