@@ -1,0 +1,71 @@
+.chart-wrapper {
+  width: 100%;
+}
+
+.chart-wrapper h3 {
+  color: #1abc9c;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.custom-tooltip {
+  background: rgba(15, 76, 58, 0.95);
+  border: 1px solid #1abc9c;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.custom-tooltip p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.custom-tooltip .label {
+  color: #1abc9c;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.custom-tooltip .value {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.custom-tooltip .liters {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.custom-tooltip .count {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.custom-tooltip .percentage {
+  color: #95a5a6;
+  font-size: 0.85rem;
+}
+
+/* Recharts customization */
+:global(.recharts-surface) {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+:global(.recharts-cartesian-axis-tick text) {
+  fill: #bdc3c7 !important;
+}
+
+:global(.recharts-legend-wrapper) {
+  padding-top: 20px !important;
+}
+
+:global(.recharts-legend-item-text) {
+  color: #ecf0f1 !important;
+  font-size: 0.9rem !important;
+}
+
+:global(.recharts-pie-sector) {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}

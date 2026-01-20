@@ -1,0 +1,75 @@
+.app {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f4c3a 0%, #0a2f23 100%);
+}
+
+.app-header {
+  padding: 30px 20px;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid #1abc9c;
+}
+
+.app-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.app-header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  color: #e0e0e0;
+}
+
+.nav-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn {
+  padding: 12px 30px;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #1abc9c;
+}
+
+.nav-btn.active {
+  background: #1abc9c;
+  border-color: #1abc9c;
+  color: #0a2f23;
+}
+
+.app-content {
+  padding: 30px 20px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .nav-tabs {
+    flex-direction: column;
+  }
+
+  .nav-btn {
+    width: 100%;
+  }
+}
