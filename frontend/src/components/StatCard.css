@@ -7,6 +7,7 @@
   gap: 20px;
   align-items: flex-start;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   cursor: pointer;
   overflow: hidden;

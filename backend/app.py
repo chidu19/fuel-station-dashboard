@@ -329,11 +329,13 @@ def get_transactions():
             query = query.filter_by(fuel=fuel_filter)
         
         if date_from:
-            from_date = pd.to_datetime(date_from).date()
+            from datetime import datetime
+            from_date = datetime.strptime(date_from, '%Y-%m-%d').date()
             query = query.filter(Transaction.date >= from_date)
         
         if date_to:
-            to_date = pd.to_datetime(date_to).date()
+            from datetime import datetime
+            to_date = datetime.strptime(date_to, '%Y-%m-%d').date()
             query = query.filter(Transaction.date <= to_date)
         
         transactions = query.order_by(Transaction.date.desc(), Transaction.time.desc()).all()
