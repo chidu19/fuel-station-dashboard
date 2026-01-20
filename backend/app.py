@@ -408,6 +408,8 @@ def get_stats_by_date():
             'daily_summary': daily_summary,
             'total_records': len(transactions)
         }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/clear-database', methods=['DELETE'])
 def clear_database():
@@ -429,9 +431,6 @@ def clear_database():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Failed to delete data: {str(e)}'}), 500
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
