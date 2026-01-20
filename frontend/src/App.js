@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Dashboard from './components/Dashboard';
 import FileUpload from './components/FileUpload';
@@ -20,7 +20,7 @@ function App() {
   const cacheTimeRef = React.useRef({});
   const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in ms
 
-  const fetchDashboardData = async (filterParams = {}) => {
+  const fetchDashboardData = useCallback(async (filterParams = {}) => {
     // Generate cache key from filter params
     const cacheKey = JSON.stringify(filterParams);
     const now = Date.now();
@@ -48,11 +48,11 @@ function App() {
       console.error('Error fetching data:', error);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   const handleApplyFilter = (filterParams) => {
     setFilters(filterParams);
