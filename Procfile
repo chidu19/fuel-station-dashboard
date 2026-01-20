@@ -1,1 +1,1 @@
-web: cd backend && gunicorn -w 4 -b 0.0.0.0:5000 wsgi:app
+web: gunicorn --chdir backend --workers 4 --bind 0.0.0.0:5000 wsgi:app
