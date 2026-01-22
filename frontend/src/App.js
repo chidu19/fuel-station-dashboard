@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { Analytics } from '@vercel/analytics/react';
 import Dashboard from './components/Dashboard';
 import FileUpload from './components/FileUpload';
 import DailySalesAnalysis from './components/DailySalesAnalysis';
@@ -112,6 +113,8 @@ function App() {
           <FileUpload onUploadSuccess={handleUploadSuccess} />
         )}
       </div>
+
+      <Analytics />
     </div>
   );
 }
